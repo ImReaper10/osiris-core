@@ -6,8 +6,8 @@ Weâ€™ll be working with Python to complete our tasks, and for handling gRPC, weâ
 ## List of assigments for members of the team:
 
 ### Japjot Bedi
-API 3: Real-time Monitoring Command 
-API 8: Aggregate Function Results Command 
+- API 3: Real-time Monitoring Command 
+- API 8: Aggregate Function Results Command 
 
 ### Javin Kenta
 API 5: Function Call with Circuit Breaker Command
