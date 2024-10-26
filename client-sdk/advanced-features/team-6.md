@@ -6,14 +6,20 @@ Weâ€™ll be working with Python to complete our tasks, and for handling gRPC, weâ
 ## List of assigments for members of the team:
 
 ### Japjot Bedi
+API 3: Real-time Monitoring Command 
+API 8: Aggregate Function Results Command 
 
 ### Javin Kenta
+API 5: Function Call with Circuit Breaker Command
 
 ### Oscar Cotto
+API 2 : Function Retry Command 
+API 6: Cache Function Results Command 
 
 ### Diego Velasquez
-
+API 4: Stream Function Output Command 
 ### Husain Awan
+API 7: Invalidate Cache Command 
 
 ### James Goode
 - API 1: Batch Function Calls Command
