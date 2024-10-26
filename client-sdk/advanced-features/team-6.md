@@ -20,7 +20,7 @@ We’ll be working with Python to complete our tasks, and for handling gRPC, we�
 - API 4: Stream Function Output Command 
 ### Husain Awan
 - API 7: Invalidate Cache Command
-- Write the function to invalidate a cached result based on function name and arguments. Handle cases where the cache entry doesn’t exist.
+- Write a function to invalidate a cached result based on function name and arguments. Handle cases where the cache entry doesn’t exist.
 - Build a simple in-memory cache to simulate real behavior, allowing validation of cache invalidation.
 - Write unit tests to ensure cache entries are properly invalidated and handle non-existing entries.
 - Start creating reusable error-handling functions to standardize error management across APIs.
