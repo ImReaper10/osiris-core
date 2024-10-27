@@ -21,10 +21,7 @@ Weâ€™ll be working with Python to complete our tasks, and for handling gRPC, weâ
 - API 4: Stream Function Output Command 
 ### Husain Awan
 - API 7: Invalidate Cache Command
-- Write a function to invalidate a cached result based on function name and arguments. Handle cases where the cache entry doesnâ€™t exist.
-- Build a simple in-memory cache to simulate real behavior, allowing validation of cache invalidation.
-- Write unit tests to ensure cache entries are properly invalidated and handle non-existing entries.
-- Start creating reusable error-handling functions to standardize error management across APIs.
+- Implement the invalidateCache API to invalidate cached results based on function name and arguments, build an in-memory cache for testing, write unit tests to validate cache invalidation, and begin creating reusable error-handling functions for consistent error management across APIs.
  
 
 ### James Goode
@@ -33,4 +30,4 @@ Weâ€™ll be working with Python to complete our tasks, and for handling gRPC, weâ
 - Setting up the shared file in the parent folder with Team 5 ("The Outsiders")
 
 ## Link to our project plan:
-**TODO**
+https://dreamteam6.atlassian.net/jira/core/projects/DREAM/list?direction=ASC&sortBy=customfield_10036&atlOrigin=eyJpIjoiMzlhNWJmMTBkYWNlNGY2M2IzZGE3ZjZkODRhYzBhYmQiLCJwIjoiaiJ9
