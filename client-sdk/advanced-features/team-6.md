@@ -11,6 +11,7 @@ Weâ€™ll be working with Python to complete our tasks, and for handling gRPC, weâ
 
 ### Javin Kenta
 - API 5: Function Call with Circuit Breaker Command
+- Write Unit Tests
 
 ### Oscar Cotto
 - API 2 : Function Retry Command 
