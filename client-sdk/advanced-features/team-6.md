@@ -18,12 +18,13 @@ Weâ€™ll be working with Python to complete our tasks, and for handling gRPC, weâ
 - API 6: Cache Function Results Command 
 
 ### Diego Velasquez
-- API 4: Stream Function Output Command 
+- API 4: Stream Function Output Command
+  
 ### Husain Awan
 - API 7: Invalidate Cache Command
-- Implement the invalidateCache API to invalidate cached results based on function name and arguments, build an in-memory cache for testing, write unit tests to validate cache invalidation, and begin creating reusable error-handling functions for consistent error management across APIs.
+- Implement the invalidateCache API to invalidate cached results based on function name and arguments, build an in-memory cache for testing, write unit tests to validate cache invalidation
+- Begin creating reusable error-handling functions for consistent error management across APIs.
  
-
 ### James Goode
 - API 1: Batch Function Calls Command
 - API 9: Parallel Function Execution Command
