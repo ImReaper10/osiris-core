@@ -12,6 +12,41 @@ def callFunctionBatch(function_calls: list) -> list:
         results.append(make_request(call["function_name"],call["args"]))
     return results
 
+
+# API 2
+def retryFunctionCall(function_name: str, *args, retries: int = 3) -> any:
+    attempt = 0
+    while attempt < retries:
+        result = make_request(function_name, args)
+        if isinstance(result, Exception):
+            print(f"Attempt {attempt + 1} failed: {result}")
+            attempt += 1
+            if attempt < retries:
+                time.sleep(2)
+        else:
+            return result      
+    raise Exception(f"All {retries} retries failed.")
+
+
+# API 6
+def cacheFunctionResult(function_name: str, *args, ttl: int = 300) -> any:
+    if not hasattr(cacheFunctionResult, "cache"):
+        cacheFunctionResult.cache = {} 
+    cache_key = (function_name, args)
+    current_time = time.time()
+    if cache_key in cacheFunctionResult.cache:
+        result, expiry = cacheFunctionResult.cache[cache_key]
+        if current_time < expiry:
+            return result 
+    result = make_request(function_name, args)
+    if isinstance(result, Exception):
+        raise result
+    cacheFunctionResult.cache[cache_key] = (result, current_time + ttl)
+    return result
+
+
+
+
 #API 9
 def callFunctionsInParallel(function_calls: list) -> list:
     threads = []
@@ -53,4 +88,3 @@ def mult(a,b):
 
 def div(a,b):
     return a/b
-
