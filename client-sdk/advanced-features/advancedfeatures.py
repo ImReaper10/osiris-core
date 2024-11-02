@@ -139,3 +139,7 @@ class FunctionRequestError(Exception):
 #This is just a temp function for registering a function from another place if you wanted to add more functions to test with
 def register(fname, func):
     globals()[fname] = func
+
+def set_chance_of_network_failure(chance):
+    global chance_of_network_failure
+    chance_of_network_failure = chance
