@@ -42,7 +42,6 @@ class API2Tests(unittest.TestCase):
         self.assertEqual(str(context.exception), "All 3 retries failed.")
         self.assertEqual(mock_request.call_count, 3)  # Confirm it retries 3 times
 
-
 class API6Tests(unittest.TestCase):
     def setUp(self):
         # Clear the cache before each test
