@@ -24,23 +24,36 @@ class API1Tests(unittest.TestCase):
 
 
 class API2Tests(unittest.TestCase):
-    @patch("advancedfeatures.make_request")
-    def test_retry_success(self, mock_request):
-      # Simulate 2 failures and then a success
-      mock_request.side_effect = [Exception("Network error"), Exception("Network error"), 10]
-      result = client.retryFunctionCall("add", 5, 5, retries=3)
-      self.assertEqual(result, 10)
-      self.assertEqual(mock_request.call_count, 3)  # Ensure all attempts were made
+    def test_retry_success(self):
+        global callcount
+        callcount = 0
+        def temp_test(a,b):
+            global callcount
+            callcount+=1
+            if(callcount < 3):
+                raise Exception("Nope")
+            return a+b
+        client.register("add2",temp_test)
+        result = client.retryFunctionCall("add2", 5, 5, retries=3)
+        self.assertEqual(result, 10)
+        self.assertEqual(callcount, 3)
 
-
-    @patch("advancedfeatures.make_request")
-    def test_retry_failure(self, mock_request):
-        # Always fail
-        mock_request.side_effect = Exception("Network error")
-        with self.assertRaises(Exception) as context:
-            client.retryFunctionCall("add", 5, 5, retries=3)
-        self.assertEqual(str(context.exception), "All 3 retries failed.")
-        self.assertEqual(mock_request.call_count, 3)  # Confirm it retries 3 times
+    def test_retry_failure(self):
+        global callcount
+        callcount = 0
+        def temp_test(a,b):
+            global callcount
+            callcount+=1
+            if(callcount < 5):
+                raise Exception("Nope")
+            return a+b
+        client.register("add2",temp_test)
+        try:
+            client.retryFunctionCall("add2", 5, 5, retries=4)
+            self.assertTrue(False)
+        except Exception as err:
+            self.assertEqual(str(err), "All 4 retries failed.")
+            self.assertEqual(callcount, 4)
 
 class API6Tests(unittest.TestCase):
     def setUp(self):
@@ -48,36 +61,44 @@ class API6Tests(unittest.TestCase):
         if hasattr(client.cacheFunctionResult, "cache"):
             del client.cacheFunctionResult.cache
 
-    @patch("advancedfeatures.make_request")
-    def test_cache_hit(self, mock_request):
-        mock_request.return_value = 15
-        result1 = client.cacheFunctionResult("add", 7, 8)
-        result2 = client.cacheFunctionResult("add", 7, 8)
+    def test_cache_hit(self):
+        global callcount
+        callcount = 0
+        def temp_test(a,b):
+            global callcount
+            callcount+=1
+            return a+b
+        client.register("add2",temp_test)
+        result1 = client.cacheFunctionResult("add2", 7, 8)
+        result2 = client.cacheFunctionResult("add2", 7, 8)
         self.assertEqual(result1, 15)
         self.assertEqual(result2, 15)
-        self.assertEqual(mock_request.call_count, 1)  # Cached, so only called once
+        self.assertEqual(callcount, 1)  # Cached, so only called once
 
-    @patch("advancedfeatures.make_request")
-    def test_cache_miss_due_to_expiry(self, mock_request):
-        mock_request.return_value = 15
-        result1 = client.cacheFunctionResult("add", 7, 8, ttl=0.5)
+    def test_cache_miss_due_to_expiry(self):
+        global callcount
+        callcount = 0
+        def temp_test(a,b):
+            global callcount
+            callcount+=1
+            return a+b
+        client.register("add2",temp_test)
+        result1 = client.cacheFunctionResult("add2", 7, 8, ttl=0.5)
         self.assertEqual(result1, 15)  # This should compute 7 + 8
 
         time.sleep(1)  # Wait for cache to expire
 
-        result2 = client.cacheFunctionResult("add", 7, 8, ttl=0.5)
+        result2 = client.cacheFunctionResult("add2", 7, 8, ttl=0.5)
         self.assertEqual(result2, 15)  # This should compute 7 + 8 again after expiry
         
-        # Check that make_request was called twice (once for each call to cacheFunctionResult)
-        self.assertEqual(mock_request.call_count, 2)
+        self.assertEqual(callcount, 2)
 
-    @patch("advancedfeatures.make_request")
-    def test_cache_error_handling(self, mock_request):
-        mock_request.side_effect = Exception("Calculation error")
-        with self.assertRaises(Exception) as context:
-            client.cacheFunctionResult("div", 10, 0)
-        self.assertEqual(str(context.exception), "Calculation error")
-        self.assertEqual(mock_request.call_count, 1)
+    def test_cache_error_handling(self):
+        try:
+            res = client.cacheFunctionResult("div", 10, 0)
+            self.assertTrue(False)
+        except Exception as err:
+            self.assertTrue(type(err) == client.FunctionRequestError and "ZeroDivisionError" in str(err))
 
 
 class API9Tests(unittest.TestCase):
