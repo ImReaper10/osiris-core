@@ -30,7 +30,7 @@ def retryFunctionCall(function_name: str, *args, retries: int = 3) -> any:
 
 # API 4
 def streamFunctionOutput(function_name: str, *args: list) -> Iterator:
-    return make_request(function_name, *args)
+    return make_request_2(function_name, *args)
 
 # API 6
 def cacheFunctionResult(function_name: str, *args, ttl: int = 300) -> any:
@@ -83,7 +83,7 @@ def make_request(function_name, args):
 
 #UPDATED make_request based on API 4 
 #I'm not sure if this is the correct approach but if you guys think it needs some changes then let me know
-def make_request(function_name, args):
+def make_request_2(function_name, args):
     func = globals().get(function_name)
     if func is None:
         yield ValueError(f"Function '{function_name}' not found.")
