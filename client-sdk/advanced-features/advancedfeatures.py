@@ -18,15 +18,14 @@ def callFunctionBatch(function_calls: list) -> list:
 def retryFunctionCall(function_name: str, *args, retries: int = 3) -> any:
     attempt = 0
     while attempt < retries:
-        try:
-            result = make_request(function_name, args)
-            return result  # If successful, return the result immediately
-        except Exception as e:
-            print(f"Attempt {attempt + 1} failed: {e}")
+        result = make_request(function_name, args)
+        if isinstance(result, Exception):
+            print(f"Attempt {attempt + 1} failed: {result}")
             attempt += 1
             if attempt < retries:
                 time.sleep(2)
-    
+        else:
+            return result      
     raise Exception(f"All {retries} retries failed.")
 
 
@@ -38,17 +37,16 @@ def streamFunctionOutput(function_name: str, *args: list) -> Iterator:
 # API 6
 def cacheFunctionResult(function_name: str, *args, ttl: int = 300) -> any:
     if not hasattr(cacheFunctionResult, "cache"):
-        cacheFunctionResult.cache = {}
+        cacheFunctionResult.cache = {} 
     cache_key = (function_name, args)
     current_time = time.time()
-    
     if cache_key in cacheFunctionResult.cache:
         result, expiry = cacheFunctionResult.cache[cache_key]
         if current_time < expiry:
-            return result  # Return cached result if not expired
-    
-    # Fetch new result and store it in the cache
-    result = make_request(function_name, *args)  # Use *args here to unpack
+            return result 
+    result = make_request(function_name, args)
+    if isinstance(result, Exception):
+        raise result
     cacheFunctionResult.cache[cache_key] = (result, current_time + ttl)
     return result
 
