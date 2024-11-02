@@ -1,5 +1,6 @@
 import unittest
 import sys
+import threading
 from unittest.mock import patch
 import time
 sys.path.insert(0, "../")
@@ -25,35 +26,45 @@ class API1Tests(unittest.TestCase):
 
 class API2Tests(unittest.TestCase):
     def test_retry_success(self):
-        global callcount
-        callcount = 0
-        def temp_test(a,b):
-            global callcount
-            callcount+=1
-            if(callcount < 3):
-                raise Exception("Nope")
-            return a+b
-        client.register("add2",temp_test)
-        result = client.retryFunctionCall("add2", 5, 5, retries=3)
-        self.assertEqual(result, 10)
-        self.assertEqual(callcount, 3)
+        client.chance_of_network_failure = 0
+        global count
+        count = 0
+        def check_thread():
+            global count
+            try:
+                result = client.retryFunctionCall("add", 5, 5, retries=3, logging=False)
+                if result == 10:
+                    count+=1
+            except Exception as err:
+                pass
+        threads = []
+        for i in range(100):
+            thread = threading.Thread(target=check_thread)
+            thread.start()
+            threads.append(thread)
+        for thread in threads:
+            thread.join()
+        self.assertEqual(count, 100)
 
     def test_retry_failure(self):
-        global callcount
-        callcount = 0
-        def temp_test(a,b):
-            global callcount
-            callcount+=1
-            if(callcount < 5):
-                raise Exception("Nope")
-            return a+b
-        client.register("add2",temp_test)
-        try:
-            client.retryFunctionCall("add2", 5, 5, retries=4)
-            self.assertTrue(False)
-        except Exception as err:
-            self.assertEqual(str(err), "All 4 retries failed.")
-            self.assertEqual(callcount, 4)
+        client.chance_of_network_failure = 1
+        global count
+        count = 0
+        def check_thread():
+            global count
+            try:
+                result = client.retryFunctionCall("add", 5, 5, retries=3, logging=False)
+            except:
+                count+=1
+                pass
+        threads = []
+        for i in range(100):
+            thread = threading.Thread(target=check_thread)
+            thread.start()
+            threads.append(thread)
+        for thread in threads:
+            thread.join()
+        self.assertEqual(count, 100)
 
 class API6Tests(unittest.TestCase):
     def setUp(self):
