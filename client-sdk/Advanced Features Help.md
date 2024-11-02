@@ -39,7 +39,7 @@ print(results)  # Expected output: [8, 6]
 
 ### Retry Function Calls - `retryFunctionCall`
 
-The `retryFunctionCall` API is used to retry a function call in case of a network failure. Currently, for development purposes, there is a set chance of a fake network failure happening which you can see below. The function retries the call up to a specified number of times before throwing an exception if all attempts fail. Note: The functions themselves can still raise exceptions, this function only retries if and only if a network failure occurs.
+The `retryFunctionCall` API is used to retry a function call in case of a network failure or function exception. Currently, for development purposes, there is a set chance of a fake network failure happening which you can see below. The function retries the call up to a specified number of times before throwing an exception if all attempts fail.
 
 #### Parameters:
 - `function_name` (str): The name of the function to call.
@@ -66,7 +66,14 @@ try:
     oc.set_chance_of_network_failure(0)
     result = oc.retryFunctionCall("div", 10, 0, retries=2)
 except Exception as e:
-    print(e)  # Expected output: Division by zero error message
+    print(e)  # Expected output: All retries fail because of division by zero
+
+try:
+    oc.set_chance_of_network_failure(0)
+    result = oc.retryFunctionCall("add", 2, 3, retries=2)
+    print(result) # Should print 5
+except Exception as e:
+    print(e)  # Never should happen
 ```
 
 ---
