@@ -14,18 +14,23 @@ def callFunctionBatch(function_calls: list) -> list:
     return results
 
 
+chance_of_network_failure = 0.25
+
 # API 2
-def retryFunctionCall(function_name: str, *args, retries: int = 3) -> any:
+def retryFunctionCall(function_name: str, *args, retries: int = 3, logging: bool = True) -> any:
     attempt = 0
     while attempt < retries:
-        result = make_request(function_name, args)
-        if isinstance(result, Exception):
-            print(f"Attempt {attempt + 1} failed: {result}")
+        if random.uniform(0, 1) < chance_of_network_failure:
+            if logging:
+                print(f"Attempt {attempt + 1} failed")
             attempt += 1
             if attempt < retries:
                 time.sleep(2)
         else:
-            return result      
+            res = make_request(function_name, args)  
+            if isinstance(res,Exception):
+                raise res
+            return res
     raise Exception(f"All {retries} retries failed.")
 
 
