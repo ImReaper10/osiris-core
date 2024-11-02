@@ -18,37 +18,39 @@ def callFunctionBatch(function_calls: list) -> list:
 def retryFunctionCall(function_name: str, *args, retries: int = 3) -> any:
     attempt = 0
     while attempt < retries:
-        result = make_request(function_name, args)
-        if isinstance(result, Exception):
-            print(f"Attempt {attempt + 1} failed: {result}")
+        try:
+            result = make_request(function_name, args)
+            return result  # If successful, return the result immediately
+        except Exception as e:
+            print(f"Attempt {attempt + 1} failed: {e}")
             attempt += 1
             if attempt < retries:
                 time.sleep(2)
-        else:
-            return result      
+    
     raise Exception(f"All {retries} retries failed.")
+
 
 # API 4
 def streamFunctionOutput(function_name: str, *args: list) -> Iterator:
     return make_request_2(function_name, *args)
 
+
 # API 6
 def cacheFunctionResult(function_name: str, *args, ttl: int = 300) -> any:
     if not hasattr(cacheFunctionResult, "cache"):
-        cacheFunctionResult.cache = {} 
+        cacheFunctionResult.cache = {}
     cache_key = (function_name, args)
     current_time = time.time()
+    
     if cache_key in cacheFunctionResult.cache:
         result, expiry = cacheFunctionResult.cache[cache_key]
         if current_time < expiry:
-            return result 
-    result = make_request(function_name, args)
-    if isinstance(result, Exception):
-        raise result
+            return result  # Return cached result if not expired
+    
+    # Fetch new result and store it in the cache
+    result = make_request(function_name, *args)  # Use *args here to unpack
     cacheFunctionResult.cache[cache_key] = (result, current_time + ttl)
     return result
-
-
 
 
 #API 9
@@ -75,11 +77,11 @@ def make_request(function_name, args):
     time.sleep(random.uniform(0.5, 1.5))
     func = globals().get(function_name)
     if func is None:
-        return ValueError(f"Function '{function_name}' not found.") #TODO: replace this part here with a standardized error handling for function not found *possibly*
+        return ValueError(f"Function '{function_name}' not found.")
     try:
         return func(*args)
     except Exception as err:
-        return err
+        return FunctionRequestError(function_name, args, err)
 
 #UPDATED make_request based on API 4 
 #I'm not sure if this is the correct approach but if you guys think it needs some changes then let me know
@@ -102,7 +104,10 @@ def make_request_2(function_name, args):
             time.sleep(random.uniform(0.5, 1.5))
 
             result = func(*args)
-            yield result
+            try:
+                yield func(*args)
+            except Exception as err:
+                yield FunctionRequestError(function_name, args, err)
         else:
             yield ValueError(f"Function '{function_name}' is not callable.")
     except Exception as err:
@@ -119,6 +124,14 @@ def mult(a,b):
 
 def div(a,b):
     return a/b
+
+class FunctionRequestError(Exception):
+    def __init__(self, function_name, args, error):
+        error_message = (
+            f"Function '{function_name}' with args {args} "
+            f"returns a {type(error).__name__} exception with message: {str(error)}"
+        )
+        super().__init__(error_message)
 
 #This is just a temp function for registering a function from another place if you wanted to add more functions to test with
 def register(fname, func):
