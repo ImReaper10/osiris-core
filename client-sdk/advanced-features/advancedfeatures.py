@@ -22,15 +22,20 @@ def retryFunctionCall(function_name: str, *args, retries: int = 3, logging: bool
     while attempt < retries:
         if random.uniform(0, 1) < chance_of_network_failure:
             if logging:
-                print(f"Attempt {attempt + 1} failed")
+                print(f"Attempt {attempt + 1} failed due to network failure")
             attempt += 1
             if attempt < retries:
                 time.sleep(2)
         else:
             res = make_request(function_name, args)  
             if isinstance(res,Exception):
-                raise res
-            return res
+                if logging:
+                    print(f"Attempt {attempt + 1} failed: " + str(res))
+                attempt+=1
+                if attempt < retries:
+                    time.sleep(2)
+            else
+                return res
     raise Exception(f"All {retries} retries failed.")
 
 
