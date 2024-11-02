@@ -4,6 +4,7 @@ import threading
 import contextlib
 import io
 import sys
+from typing import Iterator
 
 #API 1
 def callFunctionBatch(function_calls: list) -> list:
@@ -27,6 +28,9 @@ def retryFunctionCall(function_name: str, *args, retries: int = 3) -> any:
             return result      
     raise Exception(f"All {retries} retries failed.")
 
+# API 4
+def streamFunctionOutput(function_name: str, *args: list) -> Iterator:
+    return make_request(function_name, *args)
 
 # API 6
 def cacheFunctionResult(function_name: str, *args, ttl: int = 300) -> any:
@@ -77,6 +81,33 @@ def make_request(function_name, args):
     except Exception as err:
         return err
 
+#UPDATED make_request based on API 4 
+#I'm not sure if this is the correct approach but if you guys think it needs some changes then let me know
+def make_request(function_name, args):
+    func = globals().get(function_name)
+    if func is None:
+        yield ValueError(f"Function '{function_name}' not found.")
+        return
+    
+    yield "Starting function execution..."
+    time.sleep(random.uniform(0.5, 1.5))
+
+    try:
+        if callable(func):
+            yield "Processing report..."
+            time.sleep(random.uniform(0.5, 1.5))
+            yield "Fetching data..."
+            time.sleep(random.uniform(0.5, 1.5))
+            yield "Finalizing..."
+            time.sleep(random.uniform(0.5, 1.5))
+
+            result = func(*args)
+            yield result
+        else:
+            yield ValueError(f"Function '{function_name}' is not callable.")
+    except Exception as err:
+        yield err
+
 def add(a,b):
     return a+b
 
@@ -88,3 +119,7 @@ def mult(a,b):
 
 def div(a,b):
     return a/b
+
+#This is just a temp function for registering a function from another place if you wanted to add more functions to test with
+def register(fname, func):
+    globals()[fname] = func
