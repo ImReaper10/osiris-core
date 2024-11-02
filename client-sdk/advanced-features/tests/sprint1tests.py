@@ -17,9 +17,9 @@ class API1Tests(unittest.TestCase):
         
     def test_errors(self):
         res = client.callFunctionBatch([{"function_name": "add", "args": [1]}, {"function_name": "not_a_function", "args": []}, {"function_name": "div", "args": [1,0]}])
-        self.assertTrue(type(res[0]) == TypeError)
+        self.assertTrue(type(res[0]) == client.FunctionRequestError and "TypeError" in str(res[0]))
         self.assertTrue(type(res[1]) == ValueError)
-        self.assertTrue(type(res[2]) == ZeroDivisionError)
+        self.assertTrue(type(res[2]) == client.FunctionRequestError and "ZeroDivisionError" in str(res[2]))
         
 class API9Tests(unittest.TestCase):
 
@@ -33,9 +33,9 @@ class API9Tests(unittest.TestCase):
         
     def test_errors(self):
         res = client.callFunctionsInParallel([{"function_name": "add", "args": [1]}, {"function_name": "not_a_function", "args": []}, {"function_name": "div", "args": [1,0]}])
-        self.assertTrue(type(res[0]) == TypeError)
+        self.assertTrue(type(res[0]) == client.FunctionRequestError and "TypeError" in str(res[0]))
         self.assertTrue(type(res[1]) == ValueError)
-        self.assertTrue(type(res[2]) == ZeroDivisionError)
+        self.assertTrue(type(res[2]) == client.FunctionRequestError and "ZeroDivisionError" in str(res[2]))
 
 if __name__ == '__main__':
     unittest.main()
