@@ -34,7 +34,7 @@ def retryFunctionCall(function_name: str, *args, retries: int = 3, logging: bool
                 attempt+=1
                 if attempt < retries:
                     time.sleep(2)
-            else
+            else:
                 return res
     raise Exception(f"All {retries} retries failed.")
 
