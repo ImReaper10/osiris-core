@@ -75,11 +75,11 @@ def make_request(function_name, args):
     time.sleep(random.uniform(0.5, 1.5))
     func = globals().get(function_name)
     if func is None:
-        return ValueError(f"Function '{function_name}' not found.") #TODO: replace this part here with a standardized error handling for function not found *possibly*
+        return ValueError(f"Function '{function_name}' not found.")
     try:
         return func(*args)
     except Exception as err:
-        return err
+        return FunctionRequestError(function_name, args, err)
 
 #UPDATED make_request based on API 4 
 #I'm not sure if this is the correct approach but if you guys think it needs some changes then let me know
@@ -102,7 +102,10 @@ def make_request_2(function_name, args):
             time.sleep(random.uniform(0.5, 1.5))
 
             result = func(*args)
-            yield result
+            try:
+                yield func(*args)
+            except Exception as err:
+                yield FunctionRequestError(function_name, args, err)
         else:
             yield ValueError(f"Function '{function_name}' is not callable.")
     except Exception as err:
@@ -119,6 +122,14 @@ def mult(a,b):
 
 def div(a,b):
     return a/b
+
+class FunctionRequestError(Exception):
+    def __init__(self, function_name, args, error):
+        error_message = (
+            f"Function '{function_name}' with args {args} "
+            f"returns a {type(error).__name__} exception with message: {str(error)}"
+        )
+        super().__init__(error_message)
 
 #This is just a temp function for registering a function from another place if you wanted to add more functions to test with
 def register(fname, func):
