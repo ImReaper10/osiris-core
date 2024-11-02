@@ -39,22 +39,34 @@ print(results)  # Expected output: [8, 6]
 
 ### Retry Function Calls - `retryFunctionCall`
 
-The `retryFunctionCall` API is used to retry a function call in case of failure. The function retries the call up to a specified number of times before throwing an exception if all attempts fail.
+The `retryFunctionCall` API is used to retry a function call in case of a network failure. Currently, for development purposes, there is a set chance of a fake network failure happening which you can see below. The function retries the call up to a specified number of times before throwing an exception if all attempts fail. Note: The functions themselves can still raise exceptions, this function only retries if and only if a network failure occurs.
 
 #### Parameters:
 - `function_name` (str): The name of the function to call.
 - `*args` (tuple): Arguments to pass to the function.
 - `retries` (int, optional): Number of retry attempts. Default is 3.
+- `logging` (bool, optional): Whether or not to log each failure
+
+#### Global Function:
+- Use `osirisclient.set_chance_of_network_failute(float from 0 to 1)` to change the chance of a retry failing
 
 #### Returns:
 - Result of the function call if successful.
 
 #### Example Usage:
 ```python
+import osirisclient as oc
 try:
-    result = retryFunctionCall("div", 10, 0, retries=2)
+    oc.set_chance_of_network_failure(1)
+    result = oc.retryFunctionCall("div", 10, 0, retries=2)
 except Exception as e:
-    print(e)  # Expected output: All retries failed error message if division by zero.
+    print(e)  # Expected output: All retries failed error message
+
+try:
+    oc.set_chance_of_network_failure(0)
+    result = oc.retryFunctionCall("div", 10, 0, retries=2)
+except Exception as e:
+    print(e)  # Expected output: Division by zero error message
 ```
 
 ---

@@ -14,50 +14,29 @@ def callFunctionBatch(function_calls: list) -> list:
     return results
 
 
+chance_of_network_failure = 0.25
+
 # API 2
-def retryFunctionCall(function_name: str, *args, retries: int = 3) -> any:
+def retryFunctionCall(function_name: str, *args, retries: int = 3, logging: bool = True) -> any:
     attempt = 0
     while attempt < retries:
-        result = make_request(function_name, args)
-        if isinstance(result, Exception):
-            print(f"Attempt {attempt + 1} failed: {result}")
+        if random.uniform(0, 1) < chance_of_network_failure:
+            if logging:
+                print(f"Attempt {attempt + 1} failed")
             attempt += 1
             if attempt < retries:
                 time.sleep(2)
         else:
-            return result      
+            res = make_request(function_name, args)  
+            if isinstance(res,Exception):
+                raise res
+            return res
     raise Exception(f"All {retries} retries failed.")
+
 
 # API 4
 def streamFunctionOutput(function_name: str, *args: list) -> Iterator:
     return make_request_2(function_name, *args)
-
-# API 5 
-def callFunctionWithCircuitBreaker(function_name: str, *args: list, failure_threshold: int = 5, cooldown_period: int = 60) -> any:
-    if not hasattr(callFunctionWithCircuitBreaker, 'failure_count'):
-        callFunctionWithCircuitBreaker.failure_count = {}
-    if not hasattr(callFunctionWithCircuitBreaker, 'last_failure_time'):
-        callFunctionWithCircuitBreaker.last_failure_time = {}
-
-    current_time = time.time()
-
-    if function_name in callFunctionWithCircuitBreaker.last_failure_time:
-        time_since_last_failure = current_time - callFunctionWithCircuitBreaker.last_failure_time[function_name]
-        if time_since_last_failure < cooldown_period:
-            return f"Circuit breaker triggered after {failure_threshold} failed attempts. Please try again after {cooldown_period - time_since_last_failure} seconds."
-    
-    try:
-        result = make_request(function_name, *args)
-        callFunctionWithCircuitBreaker.failure_count[function_name] = 0
-        return result
-    except Exception as err:
-        callFunctionWithCircuitBreaker.failure_count[function_name] = callFunctionWithCircuitBreaker.failure_count.get(function_name, 0) + 1
-        callFunctionWithCircuitBreaker.last_failure_time[function_name] = current_time
-
-        if callFunctionWithCircuitBreaker.failure_count[function_name] >= failure_threshold:
-            return f"Circuit breaker triggered after {failure_threshold} failed attempts for '{function_name}'. Please try again later."
-
-        return err
 
 # API 6
 def cacheFunctionResult(function_name: str, *args, ttl: int = 300) -> any:
@@ -74,8 +53,6 @@ def cacheFunctionResult(function_name: str, *args, ttl: int = 300) -> any:
         raise result
     cacheFunctionResult.cache[cache_key] = (result, current_time + ttl)
     return result
-
-
 
 
 #API 9
@@ -102,11 +79,11 @@ def make_request(function_name, args):
     time.sleep(random.uniform(0.5, 1.5))
     func = globals().get(function_name)
     if func is None:
-        return ValueError(f"Function '{function_name}' not found.") #TODO: replace this part here with a standardized error handling for function not found *possibly*
+        return ValueError(f"Function '{function_name}' not found.")
     try:
         return func(*args)
     except Exception as err:
-        return err
+        return FunctionRequestError(function_name, args, err)
 
 #UPDATED make_request based on API 4 
 #I'm not sure if this is the correct approach but if you guys think it needs some changes then let me know
@@ -129,7 +106,10 @@ def make_request_2(function_name, args):
             time.sleep(random.uniform(0.5, 1.5))
 
             result = func(*args)
-            yield result
+            try:
+                yield func(*args)
+            except Exception as err:
+                yield FunctionRequestError(function_name, args, err)
         else:
             yield ValueError(f"Function '{function_name}' is not callable.")
     except Exception as err:
@@ -147,6 +127,18 @@ def mult(a,b):
 def div(a,b):
     return a/b
 
+class FunctionRequestError(Exception):
+    def __init__(self, function_name, args, error):
+        error_message = (
+            f"Function '{function_name}' with args {args} "
+            f"returns a {type(error).__name__} exception with message: {str(error)}"
+        )
+        super().__init__(error_message)
+
 #This is just a temp function for registering a function from another place if you wanted to add more functions to test with
 def register(fname, func):
     globals()[fname] = func
+
+def set_chance_of_network_failure(chance):
+    global chance_of_network_failure
+    chance_of_network_failure = chance
