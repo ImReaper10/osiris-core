@@ -48,7 +48,7 @@ The `retryFunctionCall` API is used to retry a function call in case of a networ
 - `logging` (bool, optional): Whether or not to log each failure
 
 #### Global Function:
-- Use `osirisclient.set_chance_of_network_failute(float from 0 to 1)` to change the chance of a retry failing
+- Use `osirisclient.set_chance_of_network_failure(float from 0 to 1)` to change the chance of a retry failing
 
 #### Returns:
 - Result of the function call if successful.
