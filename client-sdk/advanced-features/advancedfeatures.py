@@ -88,3 +88,7 @@ def mult(a,b):
 
 def div(a,b):
     return a/b
+
+#This is just a temp function for registering a function from another place if you wanted to add more functions to test with
+def register(fname, func):
+    globals()[fname] = func
