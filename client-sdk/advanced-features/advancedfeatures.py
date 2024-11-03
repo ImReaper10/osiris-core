@@ -5,6 +5,7 @@ import contextlib
 import io
 import sys
 from typing import Iterator
+from datetime import datetime
 
 #API 1
 def callFunctionBatch(function_calls: list) -> list:
@@ -38,7 +39,12 @@ def retryFunctionCall(function_name: str, *args, retries: int = 3, logging: bool
                 return res
     raise Exception(f"All {retries} retries failed.")
 
-
+# API 3
+real_time_monitoring = False
+def enableRealTimeMonitoring() -> None:
+    global real_time_monitoring
+    real_time_monitoring = True
+    
 # API 4
 def streamFunctionOutput(function_name: str, *args: list) -> Iterator:
     return make_request_2(function_name, *args)
@@ -118,12 +124,24 @@ def callFunctionsInParallel(function_calls: list) -> list:
 #Example usage: make_request("add", (1,2))
 def make_request(function_name, args):
     time.sleep(random.uniform(0.5, 1.5))
+    if real_time_monitoring:
+        start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"[{start_time}] Starting {function_name} with args: {args}\n")
     func = globals().get(function_name)
     if func is None:
+        if real_time_monitoring:
+            print(f"Function '{function_name}' not found.\n")
         return ValueError(f"Function '{function_name}' not found.")
     try:
+        result = func(*args)
+        if real_time_monitoring:
+            execution_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(f"[{execution_time}] {function_name} executed.\n\nResult: {result}\n")
         return func(*args)
     except Exception as err:
+        if real_time_monitoring:
+            execution_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(f"[{execution_time}] {function_name} resulted in an exception.\n\n{type(err)}: {err}\n")
         return FunctionRequestError(function_name, args, err)
 
 #UPDATED make_request based on API 4 
