@@ -85,25 +85,17 @@ def cacheFunctionResult(function_name: str, *args, ttl: int = 300) -> any:
         raise result
     cacheFunctionResult.cache[cache_key] = (result, current_time + ttl)
     return result
-<<<<<<< HEAD
 
-#API 7
-=======
+
 # API 7
->>>>>>> 61a40473ebed38c03f326200bf6af321a3e6c5b0
 def invalidateCache(function_name: str, *args: list) -> None:
     if not hasattr(cacheFunctionResult, "cache"):
-        return  # No cache exists, nothing to invalidate
+        return
     cache_key = (function_name, tuple(args))
-    # If the cache entry exists, remove it
     if cache_key in cacheFunctionResult.cache:
         del cacheFunctionResult.cache[cache_key]
-<<<<<<< HEAD
 
 
-=======
-        
->>>>>>> 61a40473ebed38c03f326200bf6af321a3e6c5b0
 #API 9
 def callFunctionsInParallel(function_calls: list) -> list:
     threads = []
