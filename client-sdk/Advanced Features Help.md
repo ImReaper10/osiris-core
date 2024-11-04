@@ -3,6 +3,8 @@
 
 This guide covers advanced API functions available in the Client SDK, demonstrating how to effectively use each function, with code examples and expected results.
 
+All of the functions below use a simulated network request. The exact way we do this is to just simply wait a small amount of time, and then locally call a function from within python. This is not how it will work once we have something to connect to. For now, built in to the functions below we have 4 functions you can call, `add`, `sub`, `mult`, and `div`. Each of these function simply add, subtract, multiply, or divide two number inputs respectivly. If you want to add your own function to test with, scroll to the bottom of the page to view the `osirisclient.register` function. Note that, the features of the core part of the SDK may behave differently (meaning other functions that aren't part of the advanced features below may behave in different ways).
+
 ---
 
 ## Table of Contents
