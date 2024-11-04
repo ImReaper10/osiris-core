@@ -15,7 +15,7 @@ All of the functions below use a simulated network request. The exact way we do 
 5. [Circuit Breaker - `callFunctionWithCircuitBreaker`](#circuit-breaker---callfunctionwithcircuitbreaker)
 6. [Caching Function Results - `cacheFunctionResult`](#caching-function-results---cachefunctionresult)
 7. [Invalidate Cache - `invalidateCache`](#invalidate-cache---invalidatecache)
-8. [Aggregate Results - `aggregateFunctionResults`](#aggregate-results---aggregateFunctionResults)
+8. [Aggregate Results - `aggregateFunctionResults`](#aggregate-results---aggregatefunctionResults)
 9. [Parallel Function Calls - `callFunctionsInParallel`](#parallel-function-calls---callfunctionsinparallel)
 
 ---
