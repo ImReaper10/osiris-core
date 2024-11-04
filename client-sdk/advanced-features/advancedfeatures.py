@@ -61,20 +61,22 @@ def callFunctionWithCircuitBreaker(function_name: str, *args: list, failure_thre
     if function_name in callFunctionWithCircuitBreaker.last_failure_time:
         time_since_last_failure = current_time - callFunctionWithCircuitBreaker.last_failure_time[function_name]
         if time_since_last_failure < cooldown_period:
-            return f"Circuit breaker triggered after {failure_threshold} failed attempts. Please try again after {cooldown_period - time_since_last_failure} seconds."
+            raise Exception(f"Circuit breaker triggered after {failure_threshold} failed attempts. Please try again after {cooldown_period - time_since_last_failure} seconds.")
     
     try:
-        result = make_request(function_name, *args)
+        result = make_request(function_name, args)
+        if isinstance(result, Exception):
+             raise result
         callFunctionWithCircuitBreaker.failure_count[function_name] = 0
         return result
-    except Exception as err:
+    except FunctionRequestError as err:
         callFunctionWithCircuitBreaker.failure_count[function_name] = callFunctionWithCircuitBreaker.failure_count.get(function_name, 0) + 1
         callFunctionWithCircuitBreaker.last_failure_time[function_name] = current_time
 
         if callFunctionWithCircuitBreaker.failure_count[function_name] >= failure_threshold:
-            return f"Circuit breaker triggered after {failure_threshold} failed attempts for '{function_name}'. Please try again later."
+            raise Exception(f"Circuit breaker triggered after {failure_threshold} failed attempts for '{function_name}'. Please try again later.")
 
-        return err
+        raise err
 
 # API 6
 def cacheFunctionResult(function_name: str, *args, ttl: int = 300) -> any:
