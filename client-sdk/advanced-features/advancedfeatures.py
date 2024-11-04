@@ -11,9 +11,8 @@ from datetime import datetime
 def callFunctionBatch(function_calls: list) -> list:
     results = []
     for call in function_calls:
-        results.append(make_request(call["function_name"],call["args"]))
+        results.append(make_request(call["function_name"],call.get("args",())))
     return results
-
 
 chance_of_network_failure = 0
 
@@ -112,7 +111,7 @@ def aggregateFunctionResults(function_calls: list) -> dict:
     for call in function_calls:
         function_name = call.get("function_name")
         name = call.get("name", function_name)
-        results[name] = make_request(function_name, call["args"])
+        results[name] = make_request(function_name, call.get("args",()))
     return results
 
 #API 9
@@ -123,7 +122,7 @@ def callFunctionsInParallel(function_calls: list) -> list:
     def thread_setup(a,b,c):
         results[c] = make_request(a,b)
     for call in function_calls:
-        thread = threading.Thread(target=thread_setup, args=(call["function_name"],call["args"],i))
+        thread = threading.Thread(target=thread_setup, args=(call["function_name"],call.get("args",()),i))
         thread.start()
         threads.append(thread)
         i+=1
