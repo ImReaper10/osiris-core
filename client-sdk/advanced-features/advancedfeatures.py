@@ -138,22 +138,22 @@ def make_request(function_name, args):
     time.sleep(random.uniform(0.5, 1.5))
     if real_time_monitoring:
         start_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"[{start_time}] Starting {function_name} with args: {args}\n")
+        print(f"[{start_time}] Starting \"{function_name}\" with args: {args}")
     func = globals().get(function_name)
     if func is None:
         if real_time_monitoring:
             print(f"Function '{function_name}' not found.\n")
-        return ValueError(f"Function '{function_name}' not found.")
+        return ValueError(f"Function \"{function_name}\" not found.")
     try:
         result = func(*args)
         if real_time_monitoring:
             execution_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f"[{execution_time}] {function_name} executed.\n\nResult: {result}\n")
+            print(f"[{execution_time}] \"{function_name}\" executed- Result: {result}")
         return result
     except Exception as err:
         if real_time_monitoring:
             execution_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f"[{execution_time}] {function_name} resulted in an exception.\n\n{type(err)}: {err}\n")
+            print(f"[{execution_time}] \"{function_name}\" resulted in an exception- {type(err).__name__}: {err}")
         return FunctionRequestError(function_name, args, err)
 
 #For API 4 

@@ -15,7 +15,8 @@ All of the functions below use a simulated network request. The exact way we do 
 5. [Circuit Breaker - `callFunctionWithCircuitBreaker`](#circuit-breaker---callfunctionwithcircuitbreaker)
 6. [Caching Function Results - `cacheFunctionResult`](#caching-function-results---cachefunctionresult)
 7. [Invalidate Cache - `invalidateCache`](#invalidate-cache---invalidatecache)
-8. [Parallel Function Calls - `callFunctionsInParallel`](#parallel-function-calls---callfunctionsinparallel)
+8. [Aggregate Results - `aggregateFunctionResults`](#aggregate-results---aggregateFunctionResults)
+9. [Parallel Function Calls - `callFunctionsInParallel`](#parallel-function-calls---callfunctionsinparallel)
 
 ---
 
@@ -179,6 +180,34 @@ The `invalidateCache` API removes a cached result, allowing fresh results to be 
 result = cacheFunctionResult("add", 4, 3, ttl=60)
 invalidateCache("add", 4, 3)
 result = cacheFunctionResult("add", 4, 3, ttl=60) # Will call the function again, rather than using cached result
+```
+
+---
+
+### Aggregate Results - `aggregateFunctionResults`
+
+The `aggregateFunctionResults` API allows multiple function calls to be called, and stored in a single result. Note if two calls are to the same function, only the last one will show up in the results unless you change the name.
+
+#### Parameters:
+- `function_calls` (list): A list of dictionaries, each with:
+  - `function_name` (str): The name of the function to call.
+  - `args` (tuple): Arguments to pass to the function.
+  - `name` (str): Name of output in the result
+
+#### Returns:
+- List of results for each function call.
+
+#### Example Usage:
+```python
+function_calls = [
+    {"function_name": "add", "args": (10, 5)},
+    {"function_name": "mult", "args": (3, 7)}, #Notice that this result gets overridden
+    {"function_name": "mult", "args": (5, 2)},
+    {"function_name": "sub", "args": (3, 7)},
+    {"function_name": "sub", "args": (3, 7), "name": "sub2"}, #Notice that this one does not
+]
+results = aggregateFunctionResults(function_calls)
+print(results)  # Expected output: {"add": 15, "mult": 10, "sub": -4, "sub2": -4}
 ```
 
 ---
