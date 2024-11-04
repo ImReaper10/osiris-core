@@ -8,8 +8,12 @@ This guide covers advanced API functions available in the Client SDK, demonstrat
 ## Table of Contents
 1. [Batch Function Calls - `callFunctionBatch`](#batch-function-calls---callfunctionbatch)
 2. [Retry Function Calls - `retryFunctionCall`](#retry-function-calls---retryfunctioncall)
-3. [Caching Function Results - `cacheFunctionResult`](#caching-function-results---cachefunctionresult)
-4. [Parallel Function Calls - `callFunctionsInParallel`](#parallel-function-calls---callfunctionsinparallel)
+3. [Enable Real-Time Monitoring - `enableRealTimeMonitoring`](#enable-real-time-monitoring---enablerealtimemonitoring)
+4. [Stream Function Output - `streamFunctionOutput`](#stream-function-output---streamfunctionoutput)
+5. [Circuit Breaker - `callFunctionWithCircuitBreaker`](#circuit-breaker---callfunctionwithcircuitbreaker)
+6. [Caching Function Results - `cacheFunctionResult`](#caching-function-results---cachefunctionresult)
+7. [Invalidate Cache - `invalidateCache`](#invalidate-cache---invalidatecache)
+8. [Parallel Function Calls - `callFunctionsInParallel`](#parallel-function-calls---callfunctionsinparallel)
 
 ---
 
@@ -39,16 +43,16 @@ print(results)  # Expected output: [8, 6]
 
 ### Retry Function Calls - `retryFunctionCall`
 
-The `retryFunctionCall` API is used to retry a function call in case of a network failure or function exception. Currently, for development purposes, there is a set chance of a fake network failure happening which you can see below. The function retries the call up to a specified number of times before throwing an exception if all attempts fail.
+The `retryFunctionCall` API is used to retry a function call in case of a network failure or function exception. It retries the call up to a specified number of times before throwing an exception if all attempts fail.
 
 #### Parameters:
 - `function_name` (str): The name of the function to call.
 - `*args` (tuple): Arguments to pass to the function.
 - `retries` (int, optional): Number of retry attempts. Default is 3.
-- `logging` (bool, optional): Whether or not to log each failure
+- `logging` (bool, optional): Whether or not to log each failure.
 
 #### Global Function:
-- Use `osirisclient.set_chance_of_network_failure(float from 0 to 1)` to change the chance of a retry failing
+- Use `set_chance_of_network_failure(float from 0 to 1)` to change the chance of a network failure, by default it is 0.
 
 #### Returns:
 - Result of the function call if successful.
@@ -78,6 +82,65 @@ except Exception as e:
 
 ---
 
+### Enable Real-Time Monitoring - `enableRealTimeMonitoring`
+
+The `enableRealTimeMonitoring` API enables logging of function call details, including start time, end time, and result. This is helpful for tracking function execution in real-time. Also lets you know if there was an exception or not, and if so, what it was. This may behave differently once we are no longer simulating requests.
+
+#### Parameters:
+- None
+
+#### Returns:
+- None
+
+#### Example Usage:
+```python
+enableRealTimeMonitoring()
+result = add(10, 5)
+print(result)  # Should output logs with timestamps.
+```
+
+---
+
+### Stream Function Output - `streamFunctionOutput`
+
+The `streamFunctionOutput` API allows real-time streaming of function outputs, which can be useful for long-running operations. However, currently it does not actually do what it will do in the future, rather it just simulates it by sending random messages, followed by at the end the result of the function. In the future, it will output what the function outputs on the backend.
+
+#### Parameters:
+- `function_name` (str): The name of the function to call.
+- `*args` (tuple): Arguments to pass to the function.
+
+#### Returns:
+- An iterator that yields the output in stages.
+
+#### Example Usage:
+```python
+for message in streamFunctionOutput("add", 5, 2):
+    print(message)  # Outputs messages in stages.
+```
+
+---
+
+### Circuit Breaker - `callFunctionWithCircuitBreaker`
+
+The `callFunctionWithCircuitBreaker` API prevents repetitive function calls if failures occur, using a failure threshold and cooldown period. Meaning, if you call a function `failure_threshold` amount of times, and each of those times it failed. If you call it again using `callFunctionWithCircuitBreaker` within `cooldown_period` seconds,  it will not let you.
+
+#### Parameters:
+- `function_name` (str): The name of the function to call.
+- `*args` (tuple): Arguments to pass to the function.
+- `failure_threshold` (int): Maximum allowed failures before activating circuit breaker.
+- `cooldown_period` (int): Time in seconds to wait after threshold reached.
+
+#### Returns:
+- Function result or circuit breaker message.
+
+#### Example Usage:
+```python
+result = callFunctionWithCircuitBreaker("div", 10, 0, failure_threshold=2, cooldown_period=10)
+print(result)  # Expected output: Circuit breaker message after threshold.
+```
+
+---
+
 ### Caching Function Results - `cacheFunctionResult`
 
 The `cacheFunctionResult` API caches the result of a function call to avoid redundant calls and improve efficiency. Results are cached for a specified time-to-live (TTL) in seconds.
@@ -98,9 +161,29 @@ print(result)  # Expected output: 7 (cached if called again within 60 seconds)
 
 ---
 
+### Invalidate Cache - `invalidateCache`
+
+The `invalidateCache` API removes a cached result, allowing fresh results to be fetched for subsequent calls.
+
+#### Parameters:
+- `function_name` (str): The name of the function.
+- `*args` (tuple): Arguments to match the cached function call.
+
+#### Returns:
+- None
+
+#### Example Usage:
+```python
+result = cacheFunctionResult("add", 4, 3, ttl=60)
+invalidateCache("add", 4, 3)
+result = cacheFunctionResult("add", 4, 3, ttl=60) # Will call the function again, rather than using cached result
+```
+
+---
+
 ### Parallel Function Calls - `callFunctionsInParallel`
 
-The `callFunctionsInParallel` API allows multiple function calls to be made concurrently using threads, making it faster to execute functions that are independent of each other.
+The `callFunctionsInParallel` API allows multiple function calls to be made concurrently using threads, making it faster to execute functions that are independent of each other. The result is given in an array, such that each index represents the order the function was in the original `function_calls` array
 
 #### Parameters:
 - `function_calls` (list): A list of dictionaries, each with:
@@ -125,28 +208,25 @@ print(results)  # Expected output: [15, 21]
 ### Helper Functions
 
 #### `register`
-The `register` function is a temporary helper function that lets you add a function to test the advanced features above with
+The `register` function allows additional functions to be tested with the advanced features. Note: This is just a temporary development function, and in the future you will not add functions to the Osiris platform this way, this is just so you can add a function to test with.
 
 **Usage:**
 ```python
-import osirisclient as oc
+def test(a, b):
+    return a * b * b
 
-def test(a,b):
-    return a*b*b
+register("test", test)
 
-oc.register("test", test) # You could put in a different name for the function you give (ie. oc.register("hello", test) then call the function with the function name of hello)
-
-result = oc.callFunctionsInParallel([
+result = callFunctionsInParallel([
     {"function_name": "add", "args": [1, 2]},
     {"function_name": "test", "args": [5, 2]}
 ])
 
-# Print the result of the parallel calls
-print(result) # Expected output: [3, 20]
+print(result)  # Expected output: [3, 20]
 ```
 
 #### `make_request`
-The `make_request` function is a temporary helper that simulates requests and calls the relevant function using a delay to mimic real-world latency.
+The `make_request` function simulates requests and delays, mimicking real-world latency. This is the function that a majority of the above functions use.
 
 **Usage:**
 ```python
