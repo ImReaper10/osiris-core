@@ -80,14 +80,20 @@ class API5Tests(unittest.TestCase):
     def test_circuit_breaker_triggered(self):
         client.register("div", client.div)
 
-        for _ in range(3):  
-            with self.assertRaises(client.FunctionRequestError):
+        for _ in range(2):  
+            try:
                 client.callFunctionWithCircuitBreaker("div", 10, 0, failure_threshold=3, cooldown_period=5)
+                self.assertTrue(False)
+            except Exception as err:
+                print(err)
+                print(client.callFunctionWithCircuitBreaker.failure_count)
+                self.assertTrue(isinstance(err, client.FunctionRequestError))
 
-        with self.assertRaises(Exception) as context:
+        try:
             client.callFunctionWithCircuitBreaker("div", 10, 0, failure_threshold=3, cooldown_period=5)
-
-        self.assertIn("Circuit breaker triggered", str(context.exception))
+            self.assertTrue(False)
+        except Exception as err:
+            self.assertTrue(isinstance(err, Exception) and "Circuit breaker triggered" in str(err))
 
     def test_circuit_breaker_resets_after_cooldown(self):
         client.register("div", client.div)

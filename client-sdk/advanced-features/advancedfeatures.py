@@ -60,8 +60,10 @@ def callFunctionWithCircuitBreaker(function_name: str, *args: list, failure_thre
 
     if function_name in callFunctionWithCircuitBreaker.last_failure_time:
         time_since_last_failure = current_time - callFunctionWithCircuitBreaker.last_failure_time[function_name]
-        if time_since_last_failure < cooldown_period:
+        if time_since_last_failure < cooldown_period and callFunctionWithCircuitBreaker.failure_count[function_name] >= failure_threshold:
             raise Exception(f"Circuit breaker triggered after {failure_threshold} failed attempts. Please try again after {cooldown_period - time_since_last_failure} seconds.")
+        elif time_since_last_failure > cooldown_period and callFunctionWithCircuitBreaker.failure_count[function_name] >= failure_threshold:
+            callFunctionWithCircuitBreaker.failure_count[function_name] = 0 # Cooldown is over
     
     try:
         result = make_request(function_name, args)
@@ -139,7 +141,7 @@ def make_request(function_name, args):
         if real_time_monitoring:
             execution_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(f"[{execution_time}] {function_name} executed.\n\nResult: {result}\n")
-        return func(*args)
+        return result
     except Exception as err:
         if real_time_monitoring:
             execution_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
