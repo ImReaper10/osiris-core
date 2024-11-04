@@ -66,6 +66,44 @@ class API2Tests(unittest.TestCase):
             thread.join()
         self.assertEqual(count, 100)
 
+class API5Tests(unittest.TestCase):
+    def setUp(self):
+        if hasattr(client.callFunctionWithCircuitBreaker, 'failure_count'):
+            client.callFunctionWithCircuitBreaker.failure_count = {}
+        if hasattr(client.callFunctionWithCircuitBreaker, 'last_failure_time'):
+            client.callFunctionWithCircuitBreaker.last_failure_time = {}
+    
+    def test_successful_call(self):
+        result = client.callFunctionWithCircuitBreaker("add", 5, 5, failure_threshold=3, cooldown_period=2)
+        self.assertEqual(result, 10)
+
+    def test_circuit_breaker_triggered(self):
+        client.register("div", client.div)
+
+        for _ in range(3):  
+            with self.assertRaises(client.FunctionRequestError):
+                client.callFunctionWithCircuitBreaker("div", 10, 0, failure_threshold=3, cooldown_period=5)
+
+        with self.assertRaises(Exception) as context:
+            client.callFunctionWithCircuitBreaker("div", 10, 0, failure_threshold=3, cooldown_period=5)
+
+        self.assertIn("Circuit breaker triggered", str(context.exception))
+
+    def test_circuit_breaker_resets_after_cooldown(self):
+        client.register("div", client.div)
+        
+        for _ in range(3):  
+            with self.assertRaises(Exception):
+                client.callFunctionWithCircuitBreaker("div", 10, 0, failure_threshold=3, cooldown_period=2)
+        
+        time.sleep(2)
+
+        try:
+            result = client.callFunctionWithCircuitBreaker("div", 10, 2, failure_threshold=3, cooldown_period=2)
+            self.assertEqual(result, 5)  
+        except Exception as context:
+            self.fail(f"Expected successful call after cooldown but got exception: {str(context)}")
+
 class API6Tests(unittest.TestCase):
     def setUp(self):
         # Clear the cache before each test
