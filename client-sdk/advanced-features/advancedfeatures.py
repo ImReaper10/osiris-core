@@ -15,7 +15,7 @@ def callFunctionBatch(function_calls: list) -> list:
     return results
 
 
-chance_of_network_failure = 0.25
+chance_of_network_failure = 0
 
 # API 2
 def retryFunctionCall(function_name: str, *args, retries: int = 3, logging: bool = True) -> any:
@@ -144,8 +144,7 @@ def make_request(function_name, args):
             print(f"[{execution_time}] {function_name} resulted in an exception.\n\n{type(err)}: {err}\n")
         return FunctionRequestError(function_name, args, err)
 
-#UPDATED make_request based on API 4 
-#I'm not sure if this is the correct approach but if you guys think it needs some changes then let me know
+#For API 4 
 def make_request_2(function_name, args):
     func = globals().get(function_name)
     if func is None:

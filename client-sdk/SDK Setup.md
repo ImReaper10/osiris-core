@@ -31,7 +31,7 @@ result = osirisclient.callFunctionsInParallel([
 print(result)
 ```
 
-This would output the results from both functions being called in parallel.
+This would output the results from both functions being called in parallel. Read through the `Advanced Features Help.md` to learn how to use some of the advanced functionality of the SDK.
 
 Happy coding!
 
