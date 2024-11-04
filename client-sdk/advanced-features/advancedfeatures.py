@@ -105,6 +105,14 @@ def invalidateCache(function_name: str, *args: list) -> None:
     if cache_key in cacheFunctionResult.cache:
         del cacheFunctionResult.cache[cache_key]
 
+# API 8
+def aggregateFunctionResults(function_calls: list) -> dict:
+    results = {}
+    for call in function_calls:
+        function_name = call.get("function_name")
+        name = call.get("name", function_name)
+        results[name] = make_request(function_name, call["args"])
+    return results
 
 #API 9
 def callFunctionsInParallel(function_calls: list) -> list:
