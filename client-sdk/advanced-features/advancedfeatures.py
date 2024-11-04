@@ -72,6 +72,7 @@ def callFunctionWithCircuitBreaker(function_name: str, *args: list, failure_thre
         callFunctionWithCircuitBreaker.failure_count[function_name] = 0
         return result
     except FunctionRequestError as err:
+        current_time = time.time()
         callFunctionWithCircuitBreaker.failure_count[function_name] = callFunctionWithCircuitBreaker.failure_count.get(function_name, 0) + 1
         callFunctionWithCircuitBreaker.last_failure_time[function_name] = current_time
 

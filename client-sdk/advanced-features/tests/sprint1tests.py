@@ -85,8 +85,6 @@ class API5Tests(unittest.TestCase):
                 client.callFunctionWithCircuitBreaker("div", 10, 0, failure_threshold=3, cooldown_period=5)
                 self.assertTrue(False)
             except Exception as err:
-                print(err)
-                print(client.callFunctionWithCircuitBreaker.failure_count)
                 self.assertTrue(isinstance(err, client.FunctionRequestError))
 
         try:
