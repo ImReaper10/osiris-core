@@ -195,7 +195,7 @@ The `aggregateFunctionResults` API allows multiple function calls to be called, 
   - `name` (str): Name of output in the result
 
 #### Returns:
-- List of results for each function call.
+- Aggregate results in a dictionary
 
 #### Example Usage:
 ```python
